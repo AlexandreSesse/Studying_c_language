@@ -1,0 +1,295 @@
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+#include<locale.h>
+
+float valorHora=0;
+
+typedef struct veiculo {
+    char placa[10];
+    char modelo[10];
+    char marca[10];
+    char cor[10];
+} Veiculo;
+
+typedef struct vagas{
+    char placa[10];
+    char hora[7];
+    int ocupada;
+} Vaga;
+
+
+Vaga vagas[10];
+
+
+void inicializa(){
+	int i, cont;
+	char numeroVaga[2];
+	FILE *arquivo;
+	char linha[15];
+	
+    for (i = 0; i <= 9; i++) {
+    		numeroVaga[0] = i+'0'; 
+			numeroVaga[1]='\0';
+        	strcat(numeroVaga, ".txt");
+
+        	arquivo = fopen(numeroVaga, "r");
+
+            
+            
+            if(fgets(linha, 15, arquivo) != NULL) {
+            	fclose(arquivo);
+            	arquivo = fopen(numeroVaga, "r");
+                strcpy(vagas[i].placa,fgets(linha, 15, arquivo));
+				strcpy(vagas[i].hora,fgets(linha, 15, arquivo));
+				vagas[i].ocupada=1;
+           }
+           else{
+           		vagas[i].ocupada=0;
+		   }
+           
+		    fclose(arquivo);
+        } 
+    }
+
+void cadastrar_veiculo() {
+    FILE *arquivo;
+    arquivo = fopen("veiculos.txt", "ab");
+    Veiculo veiculo;
+
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo.\n");
+    } else {
+        fflush(stdin);
+        printf("Digite a placa do veiculo: ");
+        fgets(veiculo.placa, 10, stdin);
+        fflush(stdin);
+        printf("\nDigite o modelo do veiculo: ");
+        fgets(veiculo.modelo, 10, stdin);
+        fflush(stdin);
+        printf("\nDigite a marca do veiculo: ");
+        fgets(veiculo.marca, 10, stdin);
+        fflush(stdin);
+        printf("\nDigite a cor do veiculo: ");
+        fgets(veiculo.cor, 10, stdin);
+    }
+
+    fprintf(arquivo, "Placa: %s\tModelo: %s\tMarca: %s\tCor: %s\n", veiculo.placa,veiculo.modelo,veiculo.marca,veiculo.cor);
+
+    fclose(arquivo);
+
+    printf("Veiculo cadastrado com sucesso!\n");
+}
+
+void listar_veiculo() {
+    char linha[15];
+    FILE *arquivo;
+
+    arquivo = fopen("veiculos.txt", "r"); 
+
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo\n");
+
+    }
+
+    printf("Veículos do estacionamento do Gurizinho:\n");
+    while (fgets(linha, 15, arquivo) != NULL) {
+        printf("%s",linha);
+    }
+
+    fclose(arquivo); 
+
+}
+
+void inserirNaVaga(){
+    int i;
+	int vagaDesejada;
+	char numeroVaga[2];
+	FILE *arquivo;
+	 
+	printf("VAGAS DISPONÍVEIS NO ESTACIONAMENTO DO GURIZINHO:\n");
+    for (i = 0; i <= 9; i++) {
+        if (vagas[i].ocupada == 0) {
+			printf("Vaga %d\n", i+1);
+        }
+    }
+    
+    printf("Digite a vaga que deseja ocupar: \n");
+    scanf("%d",&vagaDesejada);
+    
+    while(vagas[vagaDesejada-1].ocupada==1 || vagaDesejada-1<0 || vagaDesejada-1>9){
+    	printf("Você digitou uma vaga que está ocupada ou uma vaga invalida. Nao queira trapacear, digite uma vaga das que foram listadas: \n");
+    	scanf("%d",&vagaDesejada);
+	}
+	
+	fflush(stdin);
+	printf("Digite a placa do veiculo: ");
+	fgets(vagas[vagaDesejada-1].placa, 10, stdin);
+    
+    fflush(stdin);
+    printf("Que horas são?  HH:MM ");
+    fgets(vagas[vagaDesejada-1].hora, 7, stdin);
+    
+    
+    numeroVaga[0] = (vagaDesejada-1)+'0'; 
+	numeroVaga[1]='\0';
+    strcat(numeroVaga, ".txt");
+
+    arquivo = fopen(numeroVaga, "wt");
+    
+    fprintf(arquivo, "%s%s\t\n", vagas[vagaDesejada-1].placa,vagas[vagaDesejada-1].hora);
+
+    fclose(arquivo);
+    
+    vagas[vagaDesejada-1].ocupada=1;
+    
+	printf("Vaga numero %d ocupada com sucesso \n", vagaDesejada);
+    
+}
+
+void listar_vagas() {
+    int i;
+    FILE *arquivo;
+    char numeroVaga[2], linha[15];
+    printf("Vagas do estacionamento do Gurizinho:\n");
+
+	printf("----------------------------------\n");
+    for (i = 0; i <= 9; i++) {
+        if(vagas[i].ocupada == 1){
+    		numeroVaga[0] = i+'0'; 
+			numeroVaga[1]='\0';
+        	strcat(numeroVaga, ".txt");
+
+        	arquivo = fopen(numeroVaga, "r");
+
+           	printf("Vaga %d: OCUPADA \n", i+1);
+
+            	
+            while (fgets(linha, 15, arquivo) != NULL) {
+               	printf("%s", linha);
+           }
+           
+		    fclose(arquivo);
+        } 
+         else{
+        	printf("Vaga: %d VAZIA\n", i+1);
+		}
+	    printf("----------------------------------\n");
+    }
+}
+
+void pagamento(){
+ 	 int vaga; 
+	 char horaSaida[7], numeroVaga[2];
+     float valorHora, valorTotal;
+     int horaEntrada, hr, minS, totalMinEntrada, totalMinSaida, diferencaMinutos; 
+     
+	 printf("Digite o número da vaga que deseja liberar: ");
+     scanf("%d", &vaga);
+
+    if (vaga < 1 || vaga > 10) {
+        printf("Vaga inválida! Digite um número de vaga válido (de 1 a 10).\n");
+    }
+
+    if (vagas[vaga - 1].ocupada == 1) {
+     
+        printf("Digite a hora de saída (HH:MM): ");
+        scanf("%s", horaSaida);
+
+        
+        horaEntrada = atoi(vagas[vaga - 1].hora);
+        hr = atoi(strtok(horaSaida, ":"));
+        minS = atoi(strtok(NULL, ":"));
+
+       
+        totalMinEntrada = horaEntrada * 60;
+        totalMinSaida = hr * 60 + minS;
+
+        diferencaMinutos = totalMinSaida - totalMinEntrada;
+
+        printf("Digite o valor da hora: ");
+        scanf("%f", &valorHora);
+
+        valorTotal = (float)diferencaMinutos / 60 * valorHora;
+
+        printf("Valor a pagar é de: R$%.2f\n", valorTotal);
+
+        strcpy(vagas[vaga - 1].placa, "");
+        strcpy(vagas[vaga - 1].hora, "");
+        vagas[vaga - 1].ocupada = 0;
+
+        numeroVaga[0] = (vaga-1)+'0'; 
+		numeroVaga[1]='\0';
+    	strcat(numeroVaga, ".txt");
+
+
+       if (remove(numeroVaga) == 0) {
+            printf("Veículo removido da vaga %d.\n", vaga);
+        } else {
+            printf("Erro ao remover o arquivo da vaga %d.\n", vaga);
+        }
+
+    } else {
+        printf("Essa vaga não está ocupada no momento.\n");
+    }
+    
+}
+
+void definirHora(){
+	    printf("Digite o valor da hora: \n");
+        scanf("%f", &valorHora);
+}
+
+int main() {
+    setlocale(LC_ALL, "Portuguese");
+    int opcao;
+    inicializa();
+    
+    do {
+        printf("-------------------------- \n");
+        printf("\n Menu: \n");
+        printf("0. Definir o valor da hora \n");
+        printf("1. Cadastrar Veiculo\n");
+        printf("2. Listar veículos\n");
+        printf("3. Listar Vagas \n");
+        printf("4. Ocupar Vaga \n");
+        printf("5. Pagamento \n");
+        printf("6. Sair\n");
+        printf("Escolha uma opcao: ");
+        scanf("%d", &opcao);
+
+        switch (opcao) {
+        	case 0:
+            	system("cls");
+            	definirHora();
+            break;
+            case 1:
+            	system("cls");
+            	cadastrar_veiculo();
+            break;
+			case 2:
+                system("cls");
+                listar_veiculo();
+                break;
+            case 3:
+                system("cls");
+                listar_vagas();
+                break;
+            case 4:
+                system("cls");
+                inserirNaVaga();
+                break;
+            case 5:
+                system("cls");
+                pagamento();
+                break;
+            case 6:
+                printf("Saindo do programa. Adeus!\n");
+                break;
+            default:
+                printf("Opcao invalida! Tente novamente.\n");
+        }
+    } while (opcao != 6);
+
+    return 0;
+}
