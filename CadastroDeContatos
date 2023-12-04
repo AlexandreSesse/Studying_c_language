@@ -1,0 +1,155 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <locale.h>
+
+struct pessoas {
+	char nome[100];
+	char email[100];
+	char telefone[50];
+} dados;
+
+void cadastro_pessoa(){
+	FILE*arquivo;
+	arquivo = fopen("cadastro_pessoas.txt", "ab");
+	
+	if(arquivo == NULL){
+		printf("PROBLEMAS AO ABRIR O ARQUIVO!");
+	}else{
+		printf("Olá, vamos realizar o cadastro!\n\n");
+		system("pause");
+		system("cls");
+		
+		fflush(stdin);
+		printf("Digite o nome da pessoa á ser cadastrada;\n");
+		fgets(dados.nome, 100, stdin);
+		
+		fflush(stdin);
+		printf("Digite o email:\n");
+		fgets(dados.email, 100, stdin);
+		
+		fflush(stdin);
+		printf("Digite o telefone para contato:\n");
+		fgets(dados.telefone, 50, stdin);
+	}
+	
+	fprintf(arquivo, "Nome: %sEmail: %sTelefone para contato: %s", dados.nome, dados.email, dados.telefone);
+	fprintf(arquivo, "-----------------------------------------------------------------------------------------\n");
+	fclose(arquivo);
+	
+	printf("O cadastros do colaborador(a) %s foi realizado com sucesso!\n\n", dados.nome);
+	system("pause");
+} 
+
+void lista_cadastro (){
+	 char linha[200];
+	 FILE*arquivo;
+	 
+	 arquivo = fopen("cadastro_pessoas.txt", "r");
+	 
+	 if (arquivo == NULL) {
+	 	printf("Problemas ao abrir o arquivo!");
+	 }else{
+	 	printf("\t\t______________________ \n");
+	 	printf("\t\t|  Lista de contatos  |\n");
+	 	printf("\t\t|_____________________| \n\n\n");
+	 	
+	 	fprintf(arquivo, "-----------------------------------------------------------------------------------------\n");
+	 	
+	 	while(fgets(linha, 200, arquivo) !=NULL) {
+	 		printf("%s\n\n", &linha);
+		 }
+		 system("pause");
+		 fclose(arquivo);
+	 }
+	 system("cls");
+}
+
+void cabecalho(){
+	printf("\t\t**********************************************\n");
+	printf("\t\t*                                            *\n");
+	printf("\t\t* SISTEMA PARA CADASTRO DE CONTATOS | MMTECH *\n");
+	printf("\t\t*                                            *\n");
+	printf("\t\t**********************************************\n\n");
+	
+	printf("Seja muito bem vindo!\n");
+	
+	
+}
+
+void remover_cadastro() {
+    char nome_para_remover[100];
+    printf("Digite o nome da pessoa que deseja remover o cadastro:\n");
+    fflush(stdin);
+    fgets(nome_para_remover, 100, stdin);
+
+    FILE *arquivo_original, *arquivo_temporario;
+    arquivo_original = fopen("cadastro_pessoas.txt", "r");
+    arquivo_temporario = fopen("temporario.txt", "w");
+
+    if (arquivo_original == NULL || arquivo_temporario == NULL) {
+        printf("Problemas ao abrir os arquivos!");
+        return;
+    }
+
+    char linha[200];
+    int encontrado = 0;
+
+    while (fgets(linha, 200, arquivo_original) != NULL) {
+        if (strstr(linha, nome_para_remover) != NULL) {
+            encontrado = 1;
+        } else {
+            fputs(linha, arquivo_temporario);
+        }
+    }
+
+    if (!encontrado) {
+        printf("O nome especificado não foi encontrado no cadastro.\n");
+    } else {
+        printf("Cadastro removido com sucesso!\n");
+    }
+
+    fclose(arquivo_original);
+    fclose(arquivo_temporario);
+
+    remove("cadastro_pessoas.txt");
+    rename("temporario.txt", "cadastro_pessoas.txt");
+}
+
+int main() {
+	setlocale(LC_ALL, "Portuguese");
+	int op;
+	
+	do{
+        cabecalho();
+        printf("Selecione a opção desejada:\n");
+        printf("0. Cadastrar Contato\n");
+        printf("1. Listar Contatos\n");
+        printf("2. Remover pessoa do cadastro\n");
+        printf("3. Sair\n");
+        scanf("%d", &op);
+
+        switch (op) {
+        	case 0:
+            	system("cls");
+            	cadastro_pessoa();
+            break;
+            
+         case 1:
+            	system("cls");
+            	lista_cadastro();
+            break;
+            
+         case 2:
+               remover_cadastro();
+               break;
+               
+         case 3:
+         		printf("Saindo do programa. Volte sempre!\n");
+         		break;
+         		
+         default:
+               printf("Opcao invalida! Tente novamente.\n");
+        }
+    } while(op != 3);
+
+	return 0;
